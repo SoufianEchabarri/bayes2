@@ -8,6 +8,6 @@ def dist(nchain, init, propsd, X, Y):
   lambd=init[3]
   tau=init[4]
   chain[0]=init
-   alpha=init[0]
+  alpha=init[0]
   beta=init[1]              
                  
