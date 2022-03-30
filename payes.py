@@ -24,3 +24,4 @@ def Salm(nchain, init, propsd, X, Y):
       for j in range(6):
         logmuprop[i][j]=alphaprop+beta*np.log(X[j]+10)+gamma*X[j]+lambd[i][j]
     #on définit top avec la proposition
+    top=(Y*logmuprop-np.exp(logmuprop)).sum()
