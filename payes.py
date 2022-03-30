@@ -103,9 +103,8 @@ axs[1,0].set_title("gamma")
 axs[1,1].plot(np.arange(9901),res[100:,3])
 axs[1,1].set_title("tau")
 
-
-alpha=np.mean(res[100:,0])
 beta=np.mean(res[100:,1])
+alpha=np.mean(res[100:,0])
 gamma=np.mean(res[100:,2])
 tau=np.mean(res[100:,3])
 print([alpha, beta, gamma, tau])
