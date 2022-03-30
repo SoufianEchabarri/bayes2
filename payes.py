@@ -25,3 +25,9 @@ def Salm(nchain, init, propsd, X, Y):
         logmuprop[i][j]=alphaprop+beta*np.log(X[j]+10)+gamma*X[j]+lambd[i][j]
     #on définit top avec la proposition
     top=(Y*logmuprop-np.exp(logmuprop)).sum()
+    #on définit bottom
+    bottom=(Y*logmu-np.exp(logmu)).sum()
+    if np.exp(top-bottom)>np.random.uniform():#on regarde la probabilité d'acceptation
+      alpha=alphaprop
+    
+    #beta
