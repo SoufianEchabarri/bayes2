@@ -5,6 +5,7 @@ from scipy import stats
 
 def Salm(nchain, init, propsd, X, Y):
   chain=np.zeros((nchain+1, 4))
+  lambdchain=np.zeros((nchain, 18))
   alpha=init[0]
   beta=init[1]
   gamma=init[2]
@@ -13,13 +14,13 @@ def Salm(nchain, init, propsd, X, Y):
   chain[0]=[alpha, beta, gamma, tau]
   for k in range (nchain):
 
-  #alpha
+    #alpha
     logmu=np.zeros((3,6))#on définit mu pour simplifier le code
     for i in range(3):
       for j in range(6):
         logmu[i][j]=alpha+beta*np.log(X[j]+10)+gamma*X[j]+lambd[i][j]
     alphaprop=alpha+propsd[0]*sp.stats.norm.rvs()#on fait une proposition pour alpha avec une marche gaussienne
-    logmuprop=np.zeros((3,6)) #on définit mu de proposition pour simplifier le code   
+    logmuprop=np.zeros((3,6)) #on définit mu de proposition pour simplifier le code
     for i in range(3):
       for j in range(6):
         logmuprop[i][j]=alphaprop+beta*np.log(X[j]+10)+gamma*X[j]+lambd[i][j]
@@ -30,7 +31,7 @@ def Salm(nchain, init, propsd, X, Y):
     if np.exp(top-bottom)>np.random.uniform():#on regarde la probabilité d'acceptation
       alpha=alphaprop
     
-     #beta
+    #beta
     logmu=np.zeros((3,6))#on définit mu pour simplifier le code
     for i in range(3):
       for j in range(6):
@@ -74,9 +75,12 @@ def Salm(nchain, init, propsd, X, Y):
       lambd[i]=sp.stats.norm.rvs(6)/tau**0.5
 
     chain[k+1]=[alpha, beta, gamma, tau]
-  return(chain)
-
-## sim
+    c=0
+    for i in range(3):
+      for j in range(6):
+        lambdchain[k][c]=lambd[i][j]
+        c+=1
+  return(chain, lambdchain)
 
 propsd=[5,0.7,0.007,1]
 X=np.array([0, 10, 33, 100, 333, 1000])
@@ -86,11 +90,11 @@ Y=np.array([[15, 16, 16, 27, 33, 20],
 init=np.array([2, 0, 0, np.zeros((3, 6)), 0])
 print(X.shape)
 
-res=Salm(10000, init, propsd, X, Y)
+[res, lambdchain]=Salm(10000, init, propsd, X, Y)
+
 
 print(res[:100,0])
 plt.plot(res[:,2])
-
 
 fig, axs=plt.subplots(2,2,figsize=(10,10))
 
@@ -103,11 +107,28 @@ axs[1,0].set_title("gamma")
 axs[1,1].plot(np.arange(9901),res[100:,3])
 axs[1,1].set_title("tau")
 
-beta=np.mean(res[100:,1])
 alpha=np.mean(res[100:,0])
+beta=np.mean(res[100:,1])
 gamma=np.mean(res[100:,2])
 tau=np.mean(res[100:,3])
+lambd=np.array([[np.mean(lambdchain[100:,0]), np.mean(lambdchain[100:,1]), np.mean(lambdchain[100:,2]), np.mean(lambdchain[100:,3]), np.mean(lambdchain[100:,4]), np.mean(lambdchain[100:,5])],
+       [np.mean(lambdchain[100:,6]), np.mean(lambdchain[100:,7]), np.mean(lambdchain[100:,8]), np.mean(lambdchain[100:,9]), np.mean(lambdchain[100:,10]), np.mean(lambdchain[100:,11])],
+       [np.mean(lambdchain[100:,12]), np.mean(lambdchain[100:,13]), np.mean(lambdchain[100:,14]), np.mean(lambdchain[100:,15]), np.mean(lambdchain[100:,16]), np.mean(lambdchain[100:,17])]])
 print([alpha, beta, gamma, tau])
 
+def xtest(n):
+  res=np.zeros((n, 6))
+  for i in range(n):
+    res[i]=np.random.randint(0, 1000, size=6)
+  return(res)
 
+def pred(x, alpha, beta, gamma, tau, lambd):
+  mu=np.exp(alpha+beta*np.log(x+10)+gamma*x+lambd)
+  Y=sp.stats.poisson.rvs(mu)
+  return(Y)
+
+c=pred(xtest(1), alpha, beta, gamma, tau, lambd)
+for i in range(9):
+  c+=pred(xtest(1), alpha, beta, gamma, tau, lambd)
+print(c/10)
 
